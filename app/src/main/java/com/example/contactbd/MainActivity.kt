@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
                 MutableList ->
             var finalString = ""
             MutableList?.map { finalString += it.name + " " + it.phone + "\n" }
-            Log.d("22222222222222", finalString)
+
             val handler = Handler(Looper.getMainLooper())
 
             handler.post {
