@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.ContactsContract
+import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -65,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         }.doOnNext {
                 MutableList ->
             var finalString = ""
-            MutableList?.map { finalString += it.name + " " + it.phone + "\n" }
+            MutableList?.map { finalString += it.name + "            " + it.phone + "\n" }
 
             val handler = Handler(Looper.getMainLooper())
 
@@ -73,6 +74,7 @@ class MainActivity : AppCompatActivity() {
                 run {
 
                     tvTextView.text = finalString
+                    tvTextView.movementMethod = ScrollingMovementMethod()
                 }
             }
 
