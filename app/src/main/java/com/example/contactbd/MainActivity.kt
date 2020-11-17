@@ -73,30 +73,24 @@ class MainActivity : AppCompatActivity() {
             contactDAO = db?.contactDAO()
 
             val uri: Uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI
-            val cursor: Cursor? = contentResolver
+             contentResolver
                     ?.query(uri, null, null, null, null)
-            try {
-                var id = 0
+                    ?.use {
 
-                cursor?.let {
-                    while (it.moveToNext()) {
-                         val name: String =
-                             it.getString(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
-                        val phone =
+                        var id = 0
+
+                        while (it.moveToNext()) {
+                            val name: String =
+                                it.getString(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
+                            val phone =
                                 it.getString(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
 
-                        contacts.add(Contact(id, name, phone))
+                            contacts.add(Contact(id, name, phone))
 
-                        id++
+                            id++
+                        }
                     }
-                }
-            }
-            catch (e: Exception){
 
-            }
-            finally {
-                cursor?.let{ cursor.close()}
-            }
 
 
 
