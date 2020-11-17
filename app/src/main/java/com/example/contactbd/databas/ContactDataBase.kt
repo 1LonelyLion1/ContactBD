@@ -11,7 +11,7 @@ import androidx.room.RoomDatabase
     abstract fun contactDAO(): ContactDao
 
     companion object {
-        var INSTANCE: ContactDataBase? = null
+        private var INSTANCE: ContactDataBase? = null
 
         fun getContactDataBase(context: Context): ContactDataBase? {
             if (INSTANCE == null){

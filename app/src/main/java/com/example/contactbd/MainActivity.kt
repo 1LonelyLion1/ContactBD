@@ -68,30 +68,37 @@ class MainActivity : AppCompatActivity() {
     private fun loadAndShowBD(){
         Observable.fromCallable {
 
-            db = ContactDataBase.getContactDataBase(context = this) //Почемуто крашит приложуху((
+            db = ContactDataBase.getContactDataBase(context = this)
 
             contactDAO = db?.contactDAO()
 
             val uri: Uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI
             val cursor: Cursor? = contentResolver
                     ?.query(uri, null, null, null, null)
+            try {
+                var id = 0
 
-            var id = 0
+                cursor?.let {
+                    while (it.moveToNext()) {
+                         val name: String =
+                             it.getString(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
+                        val phone =
+                                it.getString(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
 
-            if (cursor != null) {
-                while (cursor.moveToNext()) {
-                    val name: String =
-                            cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
-                    val phone =
-                            cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
+                        contacts.add(Contact(id, name, phone))
 
-                    contacts.add(Contact(id, name, phone))
-
-                    id++
+                        id++
+                    }
                 }
             }
+            catch (e: Exception){
 
-            cursor?.close()
+            }
+            finally {
+                cursor?.let{ cursor.close()}
+            }
+
+
 
             contactDAO?.insertContact(contacts)
 
@@ -100,8 +107,9 @@ class MainActivity : AppCompatActivity() {
 
         }.doOnNext { MutableList ->
             var finalString = ""
-            MutableList?.map { finalString += it.name + " " + it.phone + "\n" }
-
+            MutableList?.map {
+                finalString += it.name + " " + it.phone + "\n"
+            }
 
             Handler(Looper.getMainLooper()).post {
                  run {
