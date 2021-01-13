@@ -2,13 +2,11 @@ package com.example.contactbd
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.provider.ContactsContract
 import android.text.method.ScrollingMovementMethod
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -17,6 +15,7 @@ import com.example.contactbd.databas.ContactDao
 import com.example.contactbd.databas.ContactDataBase
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -25,6 +24,7 @@ class MainActivity : AppCompatActivity() {
 
     private var db: ContactDataBase? = null
     private var contactDAO: ContactDao? = null
+    private lateinit var subscription: Disposable
 
 
 
@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun loadAndShowBD(){
-        Observable.fromCallable {
+        subscription = Observable.fromCallable {
 
             db = ContactDataBase.getContactDataBase(context = this)
 
@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity() {
 
             val uri: Uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI
              contentResolver
-                    ?.query(uri, null, null, null, null)
+                    .query(uri, null, null, null, null)
                     ?.use {
 
                         var id = 0
@@ -91,32 +91,27 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
 
-
-
-
             contactDAO?.insertContact(contacts)
 
-
-            db?.contactDAO()?.getContacts()
-
-        }.doOnNext { MutableList ->
             var finalString = ""
-            MutableList?.map {
+            db?.contactDAO()?.getContacts()?.map {
                 finalString += it.name + " " + it.phone + "\n"
             }
 
-            Handler(Looper.getMainLooper()).post {
-                 run {
-
-                    tv_text.text = finalString
-                    tv_text.movementMethod = ScrollingMovementMethod()
-                }
-             }
-
+            finalString
         }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe()
+            .subscribe {
+
+                tv_text.text = it
+                tv_text.movementMethod = ScrollingMovementMethod()
+
+            }
 
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        subscription.dispose()
+    }
 }
